@@ -2,8 +2,8 @@ import os
 from PIL import Image
 from torch.utils import data
 from torchvision import transforms as T
-from utils.read_label_file import process_label_file
-from utils.read_label_file import extract_filenames_and_targets
+from utils.utils import process_label_file
+from utils.utils import extract_filenames_and_targets
 from utils.utils import adjust_target_format
 
 
@@ -11,10 +11,11 @@ class BoschDataset(data.Dataset):
     """
     A class for the bosch dataset used in the DataLoader to create batches
     """  
-    def __init__(self, data_path, use_riib, train):
+    def __init__(self, yaml_path, data_path, train, use_riib):
+        self.yaml_path = yaml_path
         self.data_path = data_path
         self.train = train
-        self.img_labels = process_label_file(data_path, use_riib)
+        self.img_labels = process_label_file(yaml_path, data_path, train, use_riib)
         self.filenames , self.targets = extract_filenames_and_targets(self.img_labels)
 
     def __getitem__(self, index):

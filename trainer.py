@@ -12,7 +12,8 @@ def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description='Traffic Light Detection')
     parser.add_argument('--label_file_train', '-ltrain', type=str,
                         help='Path to the yaml file with the labels for training')
-    parser.add_argument('--use_riib', type=bool, default=False, help='Should the jpg or the riib images be used')
+    parser.add_argument('--data_path', type=str, help='Path to data folder')
+    parser.add_argument('--use_riib', type=bool, default=True, help='Should the jpg or the riib images be used')
     parser.add_argument('--num_workers', type=int, default=0, help='Number of workers for the data loader')
     parser.add_argument('--batch_size', type=int, default=5, help='Batch Size for training')
 
@@ -21,7 +22,7 @@ def parse_arguments() -> argparse.Namespace:
 
 
 def create_data_loader(args: argparse.Namespace) -> data.DataLoader:
-    dataset = BoschDataset(args.label_file_train, use_riib=args.use_riib, train=True)
+    dataset = BoschDataset(args.label_file_train, args.data_path, train=True, use_riib=args.use_riib)
     data_loader = data.DataLoader(dataset,
                                   batch_size=args.batch_size,
                                   shuffle=True,
