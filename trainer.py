@@ -37,18 +37,17 @@ def train_one_epoch(train_data_loader, model, device, optimizer, epoch):
         targets = result[1]
         if targets is not None:
             targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
-        output = model(images, targets)
-        print(output)
-        prediction = output['classification']
-        loss = output['loss']
+        loss_dict = model(images, targets)
+        losses = sum(loss for loss in loss_dict.values())
+        print(loss_dict)
         optimizer.zero_grad()
-        loss.backward()
+        losses.backward()
         optimizer.step()
         batch_time = time.time() - start
         if idx % 5 == 0:
             print(f'Epoch: {epoch}[{idx}/{len(train_data_loader)}]\t'
                   f'Batch Time {batch_time}\t'
-                  f'Loss {loss}')
+                  f'Loss {losses}')
 
 
 if __name__ == "__main__":
