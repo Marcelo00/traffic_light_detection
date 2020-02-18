@@ -67,8 +67,6 @@ def start_evaluation(test_data_loader, model, device, output_path, epoch, logger
                 true_labels = targets[output_idx]['labels']
                 logger.info(f'Scores {element["scores"]} \n' 
                             f'Labels predicted: {predicted_labels} Groundtruth labels: {true_labels}')
-    save_model(path=output_path, model=model, epochs=epoch)
-
 
 def train_one_epoch(train_data_loader, model, device, logger, optimizer):
     start = time.time()
