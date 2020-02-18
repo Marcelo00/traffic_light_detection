@@ -4,6 +4,7 @@ import torch
 import torchvision
 import gc
 import os
+import sys
 import logging
 from torch.utils import data
 from torch.utils.data import DataLoader
@@ -94,25 +95,26 @@ def train_one_epoch(train_data_loader, model, device, logger, optimizer):
 
 
 def creeate_logger(output_path):
-    logger = logging.getLogger(__name__)
-    logger.propagate = False
+    new_logger = logging.getLogger(__name__)
+    new_logger.setLevel(logging.INFO)
+    new_logger.propagate = False
     format_string = '%(asctime)s: %(message)s'
     logger_filer_path = os.path.join(output_path, 'logger.txt')
-    c_handler = logging.StreamHandler()
+    c_handler = logging.StreamHandler(sys.stdout)
     f_handler = logging.FileHandler(logger_filer_path, mode='w+')
     c_handler.setLevel(logging.INFO)
     f_handler.setLevel(logging.INFO)
-    handler_format = logging.Formatter(format_string, datefmt='%H:%M:%S')
+    handler_format = logging.Formatter(format_string, datefmt='%H_%M_%S')
     c_handler.setFormatter(handler_format)
     f_handler.setFormatter(handler_format)
-    logger.addHandler(f_handler)
-    logger.addHandler(c_handler)
-    return logger
+    new_logger.addHandler(f_handler)
+    new_logger.addHandler(c_handler)
+    return new_logger
 
 
 if __name__ == "__main__":
     args = parse_arguments()
-    current_time = datetime.now().strftime("%d_%b_%H:%M:%S")
+    current_time = datetime.now().strftime("%d_%b_%H_%M_%S")
     output_path = os.path.join(args.output_path, current_time)
     os.makedirs(output_path, exist_ok=True)
     logger = creeate_logger(output_path)
