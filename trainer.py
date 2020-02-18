@@ -104,7 +104,7 @@ def creeate_logger(output_path):
     f_handler = logging.FileHandler(logger_filer_path, mode='w+')
     c_handler.setLevel(logging.INFO)
     f_handler.setLevel(logging.INFO)
-    handler_format = logging.Formatter(format_string, datefmt='%d_%b_%H_%M_%S')
+    handler_format = logging.Formatter(format_string, datefmt='%d_%b_%H:%M:%S')
     c_handler.setFormatter(handler_format)
     f_handler.setFormatter(handler_format)
     new_logger.addHandler(f_handler)
