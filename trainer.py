@@ -84,12 +84,11 @@ def train_one_epoch(train_data_loader, model, device, logger, optimizer):
             losses.backward()
             optimizer.step()
             loss_per_iteration.append(losses)
-            loss_doc_str = "".join("{}_{} ".format(key, val) for key, val in loss_dict.items())
+            loss_doc_str = "".join("{}:{} ".format(key, val) for key, val in loss_dict.items())
         gc.collect()
-        if idx % 10 == 0:
-            logger.info(f'Iteration: [{idx}/{len(train_data_loader)}]\t'
-                        f'Loss: {losses} \t'
-                        f'Loss_dict: {loss_doc_str}')
+        logger.info(f'Iteration: [{idx}/{len(train_data_loader)}]\t'
+                    f'Loss: {losses} \t'
+                    f'Loss_dict: {loss_doc_str}')
     epoch_time = time.time() - start
     return loss_per_iteration, loss_dicts, epoch_time
 
