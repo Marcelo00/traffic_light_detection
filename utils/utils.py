@@ -39,14 +39,18 @@ def process_label_file(input_yaml: str, data_folder, train_data: bool, riib: boo
         # There is (at least) one annotation where xmax > 1279
         if clip:
             for j, box in enumerate(img_labels[i]['boxes']):
-                img_labels[i]['boxes'][j]['x_min'] = max(min(box['x_min'], constants.WIDTH - 1), 0)
-                img_labels[i]['boxes'][j]['x_max'] = max(min(box['x_max'], constants.WIDTH - 1), 0)
-                img_labels[i]['boxes'][j]['y_min'] = max(min(box['y_min'], constants.HEIGHT - 1), 0)
-                img_labels[i]['boxes'][j]['y_max'] = max(min(box['y_max'], constants.HEIGHT - 1), 0)
-
+                if riib:
+                    img_labels[i]['boxes'][j]['x_min'] = max(min(box['x_min'], constants.WIDTH_RIIB - 1), 0)
+                    img_labels[i]['boxes'][j]['x_max'] = max(min(box['x_max'], constants.WIDTH_RIIB - 1), 0)
+                    img_labels[i]['boxes'][j]['y_min'] = max(min(box['y_min'], constants.HEIGHT_RIIB - 1), 0)
+                    img_labels[i]['boxes'][j]['y_max'] = max(min(box['y_max'], constants.HEIGHT_RIIB - 1), 0)
+                else:
+                    img_labels[i]['boxes'][j]['x_min'] = max(min(box['x_min'], constants.WIDTH_RGB - 1), 0)
+                    img_labels[i]['boxes'][j]['x_max'] = max(min(box['x_max'], constants.WIDTH_RGB - 1), 0)
+                    img_labels[i]['boxes'][j]['y_min'] = max(min(box['y_min'], constants.HEIGHT_RGB - 1), 0)
+                    img_labels[i]['boxes'][j]['y_max'] = max(min(box['y_max'], constants.HEIGHT_RGB - 1), 0)
         # The raw imager images have additional lines with image information
-        # so the annotations need to be shifted. Since they are stored in a different
-        # folder, the path also needs modifications.
+        # so the annotations need to be shifted.
         if riib:
             for box in img_labels[i]['boxes']:
                 box['y_max'] = box['y_max'] + 8
@@ -54,7 +58,7 @@ def process_label_file(input_yaml: str, data_folder, train_data: bool, riib: boo
     return img_labels
 
 
-def get_used_img_labels(input_yaml, data_folder, riib: bool, train_data: bool):
+def get_used_img_labels(input_yaml, data_folder, train_data: bool,  riib: bool):
     with open(input_yaml, 'rb') as yaml_file:
         img_labels = yaml.load(yaml_file, Loader=yaml.FullLoader)
     yaml_base_path = os.path.abspath(os.path.dirname(input_yaml))
@@ -81,11 +85,16 @@ def get_used_img_labels(input_yaml, data_folder, riib: bool, train_data: bool):
             used_images.append(file_path)
 
     for idx in range(len(img_labels)):
-        if riib:
-            img_labels[idx]['path'] = img_labels[idx]['path'].replace('.png', '.pgm')
-        img_labels[idx]['path'] = img_labels[idx]['path'].replace('./rgb/train/', '')
-        img_labels[idx]['path'] = img_labels[idx]['path'].replace('./rgb/test/', '')
-        img_labels[idx]['path'] = os.path.join(data_root_path, img_labels[idx]['path'])
+        if train_data:
+            if riib:
+                img_labels[idx]['path'] = img_labels[idx]['path'].replace('.png', '.pgm')
+            img_labels[idx]['path'] = img_labels[idx]['path'].replace('./rgb/train/', '')
+            img_labels[idx]['path'] = os.path.join(data_root_path, img_labels[idx]['path'])
+        else:
+            if riib:
+                img_labels[idx]['path'] = img_labels[idx]['path'].replace('.png', '.pgm')
+            img_labels[idx]['path'] = img_labels[idx]['path'].split('/')[-1]
+            img_labels[idx]['path'] = os.path.join(data_root_path, img_labels[idx]['path'])
         if img_labels[idx]['path'] in used_images:
             img_labels_filtered.append(img_labels[idx])
     return img_labels_filtered
@@ -100,14 +109,17 @@ def extract_filenames_and_targets(img_labels: List[Dict]) -> Tuple[List, List]:
     return file_paths, targets
 
 
-def adjust_target_format(target: List[Dict]) -> Dict[str, Tensor]:
+def adjust_target_format(target: List[Dict], riib: bool) -> Dict[str, Tensor]:
     corrected_target = {}
     labels = []
     boxes = []
     if not target:
         # Negative samples are not supported -> add background bb to include negative samples
         labels.append(constants.CLASSES_TO_ID["Nothing"])
-        boxes.append([0, 1, 2, 3])
+        if riib:
+            boxes.append([0, 0, constants.WIDTH_RIIB, constants.HEIGHT_RIIB])
+        else:
+            boxes.append([0, 0, constants.WIDTH_RGB, constants.HEIGHT_RGB])
     else:
         for idx, element in enumerate(target):
             labels.append(constants.CLASSES_TO_ID[element['label']])
@@ -121,3 +133,7 @@ def adjust_target_format(target: List[Dict]) -> Dict[str, Tensor]:
 
 def collate_fn(batch: Tuple[Tuple]) -> Tuple[list, list]:
     return tuple(zip(*batch))
+
+
+def test_collate_fn(batch: List) -> Tuple[list, list]:
+    return batch

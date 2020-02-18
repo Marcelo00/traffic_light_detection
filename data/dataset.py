@@ -14,19 +14,19 @@ class BoschDataset(data.Dataset):
     def __init__(self, yaml_path, data_path, train, use_riib):
         self.yaml_path = yaml_path
         self.data_path = data_path
+        self.use_riib = use_riib
         self.train = train
-        self.img_labels = process_label_file(yaml_path, data_path, train, use_riib)
+        self.img_labels = process_label_file(self.yaml_path, self.data_path, self.train, self.use_riib)
         self.filenames , self.targets = extract_filenames_and_targets(self.img_labels)
 
     def __getitem__(self, index):
         image_filename = self.filenames[index]
         image = Image.open(os.path.join(self.data_path, image_filename)).convert("RGB")
-        target = self.targets[index]
-        target = adjust_target_format(target)
         image = self.transform(image)
+        target = self.targets[index]
+        target = adjust_target_format(target, self.use_riib)
         return image, target
     
-    # the total number of samples (optional)
     def __len__(self):
         return len(self.filenames)
 
