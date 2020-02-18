@@ -34,7 +34,7 @@ def parse_arguments() -> argparse.Namespace:
 def save_model(path, epochs, model):
     file_path = os.path.join(path, f'custom_model{epochs}.model')
     torch.save(model.state_dict(), file_path)
-    print("Checkpoint Saved")
+    logger.info(f"Checkpoint Saved for epoch {epoch}")
 
 
 def create_data_loader(args: argparse.Namespace) -> Tuple[DataLoader, DataLoader]:
