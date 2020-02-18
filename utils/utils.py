@@ -133,7 +133,3 @@ def adjust_target_format(target: List[Dict], riib: bool) -> Dict[str, Tensor]:
 
 def collate_fn(batch: Tuple[Tuple]) -> Tuple[list, list]:
     return tuple(zip(*batch))
-
-
-def test_collate_fn(batch: List) -> Tuple[list, list]:
-    return batch
