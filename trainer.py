@@ -139,6 +139,7 @@ if __name__ == "__main__":
             save_model(path=output_path, model=model, epochs=epoch)
         if epoch % args.start_eval == 0:
             avg_score = start_evaluation(test_data_loader, model, device, output_path, epoch, logger)
+            logger.info(f'Epoch {epoch} avg score {avg_score}')
             if avg_score > best_eval_score:
                 best_eval_score = avg_score
                 save_model(path=output_path, model=model, epochs=epoch)
