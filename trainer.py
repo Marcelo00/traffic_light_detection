@@ -57,6 +57,7 @@ def create_data_loader(args: argparse.Namespace) -> Tuple[DataLoader, DataLoader
 def start_evaluation(test_data_loader, model, device, output_path, epoch, logger):
     logger.info(f'Start evaluation after {epoch} epochs')
     model.eval()
+    scores = []
     for idx, result in enumerate(test_data_loader):
         images = list(image.to(device) for image in result[0])
         targets = result[1]
@@ -65,8 +66,11 @@ def start_evaluation(test_data_loader, model, device, output_path, epoch, logger
             for output_idx, element in enumerate(outputs):
                 predicted_labels = element['labels']
                 true_labels = targets[output_idx]['labels']
+                scores.append(element['scores'])
                 logger.info(f'Scores {element["scores"]} \n' 
                             f'Labels predicted: {predicted_labels} Groundtruth labels: {true_labels}')
+    avg_score = torch.mean(torch.stack(scores))
+    return avg_score
 
 def train_one_epoch(train_data_loader, model, device, logger, optimizer):
     start = time.time()
@@ -123,6 +127,7 @@ if __name__ == "__main__":
     model.to(device)
     params = [p for p in model.parameters() if p.requires_grad]
     optimizer = torch.optim.SGD(params, lr=0.005, momentum=0.9, weight_decay=0.0005)
+    best_eval_score = 0
     for epoch in range(1, args.epochs + 1):
         logger.info(f'Epoch {epoch}/{args.epochs}')
         try:
@@ -130,8 +135,11 @@ if __name__ == "__main__":
                                                                          optimizer=optimizer)
             avg_losses = torch.mean(torch.stack(loss_per_iteration))
             logger.info(f'Epoch {epoch} avg Loss {avg_losses} with a runtime of {epoch_time}')
-            save_model(path=output_path, model=model, epochs=epoch)
         except:
             save_model(path=output_path, model=model, epochs=epoch)
         if epoch % args.start_eval == 0:
-            start_evaluation(test_data_loader, model, device, output_path, epoch, logger)
+            avg_score = start_evaluation(test_data_loader, model, device, output_path, epoch, logger)
+            if avg_score > best_eval_score:
+                best_eval_score = avg_score
+                save_model(path=output_path, model=model, epochs=epoch)
+
