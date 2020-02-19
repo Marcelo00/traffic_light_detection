@@ -94,7 +94,7 @@ def train_one_epoch(train_data_loader, model, device, logger, optimizer):
                     f'Loss: {losses} \t'
                     f'Loss_dict: {loss_doc_str}')
     epoch_time = time.time() - start
-    return loss_per_iteration, loss_dicts, epoch_time
+    return loss_per_iteration, epoch_time
 
 
 def creeate_logger(output_path):
@@ -133,7 +133,7 @@ if __name__ == "__main__":
     for epoch in range(1, args.epochs + 1):
         logger.info(f'Epoch {epoch}/{args.epochs}')
         try:
-            loss_per_iteration, loss_dicts, epoch_time = train_one_epoch(train_data_loader, model, device, logger,
+            loss_per_iteration, epoch_time = train_one_epoch(train_data_loader, model, device, logger,
                                                                          optimizer=optimizer)
             avg_losses = torch.mean(torch.stack(loss_per_iteration))
             logger.info(f'Epoch {epoch} avg Loss {avg_losses} with a runtime of {epoch_time}')
