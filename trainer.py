@@ -99,7 +99,7 @@ def train_one_epoch(train_data_loader, model, device, logger, optimizer):
 
 def creeate_logger(output_path):
     new_logger = logging.getLogger(__name__)
-    new_logger.setLevel(logging.ERROR)
+    new_logger.setLevel(logging.INFO)
     new_logger.propagate = False
     format_string = '%(asctime)s: %(message)s'
     logger_filer_path = os.path.join(output_path, 'logger.txt')
