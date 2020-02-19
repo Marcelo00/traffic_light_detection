@@ -72,6 +72,7 @@ def start_evaluation(test_data_loader, model, device, output_path, epoch, logger
     avg_score = torch.mean(torch.stack(scores))
     return avg_score
 
+
 def train_one_epoch(train_data_loader, model, device, logger, optimizer):
     start = time.time()
     loss_per_iteration = []
@@ -97,7 +98,7 @@ def train_one_epoch(train_data_loader, model, device, logger, optimizer):
 
 def creeate_logger(output_path):
     new_logger = logging.getLogger(__name__)
-    new_logger.setLevel(logging.INFO)
+    new_logger.setLevel(logging.ERROR)
     new_logger.propagate = False
     format_string = '%(asctime)s: %(message)s'
     logger_filer_path = os.path.join(output_path, 'logger.txt')
@@ -136,6 +137,7 @@ if __name__ == "__main__":
             avg_losses = torch.mean(torch.stack(loss_per_iteration))
             logger.info(f'Epoch {epoch} avg Loss {avg_losses} with a runtime of {epoch_time}')
         except:
+            logger.error(f'Error: {sys.exc_info()[0]}')
             save_model(path=output_path, model=model, epochs=epoch)
         if epoch % args.start_eval == 0:
             avg_score = start_evaluation(test_data_loader, model, device, output_path, epoch, logger)
