@@ -67,10 +67,10 @@ def start_evaluation(test_data_loader, model, device, output_path, epoch, logger
             for output_idx, element in enumerate(outputs):
                 predicted_labels = element['labels']
                 true_labels = targets[output_idx]['labels']
-                scores.append(element['scores'])
+                scores.append(torch.mean(element['scores']))
                 logger.info(f'Scores {element["scores"]} \n' 
                             f'Labels predicted: {predicted_labels} Groundtruth labels: {true_labels}')
-    avg_score = torch.mean(torch.stack(scores))
+    avg_score = torch.mean(torch.Tensor(scores))
     return avg_score
 
 
