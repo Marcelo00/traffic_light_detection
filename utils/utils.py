@@ -119,10 +119,7 @@ def adjust_target_format(target: List[Dict], riib: bool) -> Dict[str, Tensor]:
     if not target:
         # Negative samples are not supported -> add background bb to include negative samples
         labels.append(constants.CLASSES_TO_ID["Nothing"])
-        if riib:
-            boxes.append([0, 1, 2, 3])
-        else:
-            boxes.append([0, 1, 2, 3])
+        boxes.append([0, 1, 2, 3])
     else:
         for idx, element in enumerate(target):
             labels.append(constants.CLASSES_TO_ID[element['label']])
