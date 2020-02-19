@@ -35,5 +35,4 @@ CLASSES_TO_ID = {
     'Green': 1,
     'Yellow': 2,
     'Red': 3,
-    'Nothing':4,
 }

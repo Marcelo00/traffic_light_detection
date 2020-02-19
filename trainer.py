@@ -121,7 +121,7 @@ if __name__ == "__main__":
     output_path = os.path.join(args.output_path, current_time)
     os.makedirs(output_path, exist_ok=True)
     logger = creeate_logger(output_path)
-    num_classes = 5
+    num_classes = 4
     train_data_loader, test_data_loader = create_data_loader(args)
     model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=False, num_classes=num_classes)
     # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
