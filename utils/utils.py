@@ -76,9 +76,12 @@ def get_used_img_labels(input_yaml, data_folder, train_data: bool,  riib: bool):
     if train_data:
         for folder in os.listdir(data_root_path):
             folders_path = os.path.join(data_root_path, folder)
-            for file in os.listdir(folders_path):
-                file_path = os.path.join(folders_path, file)
-                used_images.append(file_path)
+            if os.path.isfile(folders_path):
+                used_images.append(folders_path)
+            else:
+                for file in os.listdir(folders_path):
+                    file_path = os.path.join(folders_path, file)
+                    used_images.append(file_path)
     else:
         for file in os.listdir(data_root_path):
             file_path = os.path.join(data_root_path, file)
