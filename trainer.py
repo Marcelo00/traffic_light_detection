@@ -6,6 +6,7 @@ import gc
 import os
 import sys
 import logging
+import traceback
 from torch.utils import data
 from torch.utils.data import DataLoader
 from datetime import datetime
@@ -136,8 +137,8 @@ if __name__ == "__main__":
                                                                          optimizer=optimizer)
             avg_losses = torch.mean(torch.stack(loss_per_iteration))
             logger.info(f'Epoch {epoch} avg Loss {avg_losses} with a runtime of {epoch_time}')
-        except:
-            logger.error(f'Error: {sys.exc_info()[0]}')
+        except Exception as e:
+            logger.error(f'Error: {traceback.format_exc()}')
             save_model(path=output_path, model=model, epochs=epoch)
         if epoch % args.start_eval == 0:
             avg_score = start_evaluation(test_data_loader, model, device, output_path, epoch, logger)
