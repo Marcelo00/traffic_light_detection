@@ -88,6 +88,9 @@ def get_used_img_labels(input_yaml, data_folder, train_data: bool,  riib: bool):
             used_images.append(file_path)
 
     for idx in range(len(img_labels)):
+        # If no bb exist skip file
+        if not img_labels[idx]['boxes']:
+            continue
         if train_data:
             if riib:
                 img_labels[idx]['path'] = img_labels[idx]['path'].replace('.png', '.pgm')
@@ -116,14 +119,9 @@ def adjust_target_format(target: List[Dict], riib: bool) -> Dict[str, Tensor]:
     corrected_target = {}
     labels = []
     boxes = []
-    if not target:
-        # Negative samples are not supported -> add background bb to include negative samples
-        labels.append(constants.CLASSES_TO_ID["Nothing"])
-        boxes.append([0, 1, 2, 3])
-    else:
-        for idx, element in enumerate(target):
-            labels.append(constants.CLASSES_TO_ID[element['label']])
-            boxes.append([element['x_min'], element['y_min'], element['x_max'], element['y_max']])
+    for idx, element in enumerate(target):
+        labels.append(constants.CLASSES_TO_ID[element['label']])
+        boxes.append([element['x_min'], element['y_min'], element['x_max'], element['y_max']])
     labels = torch.as_tensor(labels, dtype=torch.int64)
     boxes = torch.as_tensor(boxes, dtype=torch.float32)
     corrected_target["boxes"] = boxes
