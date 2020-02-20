@@ -34,8 +34,11 @@ def parse_arguments() -> argparse.Namespace:
     return args
 
 
-def save_model(path, epochs, model, logger):
-    file_path = os.path.join(path, f'custom_model{epochs}.model')
+def save_model(path, epochs, model, logger, avg_score=0, interrupted=False):
+    if interrupted:
+        file_path = os.path.join(path, f'custom_model{epochs}_interrupted.model')
+    else:
+        file_path = os.path.join(path, f'custom_model{epochs}_{avg_score}.model')
     torch.save(model.state_dict(), file_path)
     logger.info(f"Checkpoint Saved for epoch {epochs}")
 
@@ -143,14 +146,14 @@ def main():
             logger.info(f'Epoch {epoch} avg Loss {avg_losses} with a runtime of {epoch_time}')
         except (KeyboardInterrupt, SystemExit):
             logger.error(f'Error: {traceback.format_exc()}')
-            save_model(path=output_path, model=model, epochs=epoch, logger=logger)
+            save_model(path=output_path, model=model, epochs=epoch, logger=logger, interrupted=True)
         if epoch % args.start_eval == 0:
             avg_score = start_evaluation(test_data_loader=test_data_loader, model=model, device=device, epoch=epoch,
                                          logger=logger, args=args)
             logger.info(f'Epoch {epoch} avg score {avg_score}')
             if avg_score > best_eval_score:
                 best_eval_score = avg_score
-                save_model(path=output_path, model=model, epochs=epoch, logger=logger)
+                save_model(path=output_path, epochs=epoch, model=model, logger=logger, avg_score=best_eval_score.item())
 
 
 if __name__ == "__main__":
