@@ -68,7 +68,8 @@ def start_evaluation(test_data_loader, model, device, epoch, logger, args):
             for output_idx, element in enumerate(outputs):
                 predicted_labels = element['labels']
                 true_labels = targets[output_idx]['labels']
-                scores.append(torch.mean(element['scores']))
+                if element['scores']:
+                    scores.append(torch.mean(element['scores']))
         if idx % args.print_status:
             logger.info(f'Scores {element["scores"]} \n'
                         f'Labels predicted: {predicted_labels} Groundtruth labels: {true_labels}')
