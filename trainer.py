@@ -24,7 +24,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument('--device', '-d', type=str, default='cpu', help='Device for training and evaluation.')
     parser.add_argument('--output_path', '-o', type=str, help='Path to output folder')
     parser.add_argument('--data_path', type=str, help='Path to data folder')
-    parser.add_argument('--use_riib', type=bool, default=True, help='Should the jpg or the riib images be used')
+    parser.add_argument('--use_riib', type=bool, default=False, help='Should the jpg or the riib images be used')
     parser.add_argument('--num_workers', type=int, default=0, help='Number of workers for the data loader')
     parser.add_argument('--batch_size', type=int, default=5, help='Batch Size for training')
     parser.add_argument('--start_eval', type=int, default=5, help='Epochs after which a eval run is started.')
