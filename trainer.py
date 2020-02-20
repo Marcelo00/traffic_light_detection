@@ -78,6 +78,7 @@ def start_evaluation(test_data_loader, model, device, epoch, logger, args):
 
 def train_one_epoch(train_data_loader, model, device, logger, optimizer, args):
     start = time.time()
+    model.train()
     loss_per_iteration = []
     for idx, result in enumerate(train_data_loader):
         images = list(image.to(device) for image in result[0])
