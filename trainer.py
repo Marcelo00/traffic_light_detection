@@ -34,7 +34,7 @@ def parse_arguments() -> argparse.Namespace:
     return args
 
 
-def save_model(path, epochs, model):
+def save_model(path, epochs, model, logger):
     file_path = os.path.join(path, f'custom_model{epochs}.model')
     torch.save(model.state_dict(), file_path)
     logger.info(f"Checkpoint Saved for epoch {epochs}")
@@ -56,7 +56,7 @@ def create_data_loader(args: argparse.Namespace) -> Tuple[DataLoader, DataLoader
     return train_dl, test_dl
 
 
-def start_evaluation(test_data_loader, model, device, output_path, epoch, logger):
+def start_evaluation(test_data_loader, model, device, epoch, logger, args):
     logger.info(f'Start evaluation after {epoch} epochs')
     model.eval()
     scores = []
@@ -76,7 +76,7 @@ def start_evaluation(test_data_loader, model, device, output_path, epoch, logger
     return avg_score
 
 
-def train_one_epoch(train_data_loader, model, device, logger, optimizer):
+def train_one_epoch(train_data_loader, model, device, logger, optimizer, args):
     start = time.time()
     loss_per_iteration = []
     for idx, result in enumerate(train_data_loader):
@@ -117,7 +117,7 @@ def creeate_logger(output_path):
     return new_logger
 
 
-if __name__ == "__main__":
+def main():
     args = parse_arguments()
     current_time = datetime.now().strftime("%d_%b_%H_%M_%S")
     output_path = os.path.join(args.output_path, current_time)
@@ -126,7 +126,6 @@ if __name__ == "__main__":
     num_classes = 4
     train_data_loader, test_data_loader = create_data_loader(args)
     model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=False, num_classes=num_classes)
-    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     device = args.device
     model.to(device)
     params = [p for p in model.parameters() if p.requires_grad]
@@ -135,17 +134,22 @@ if __name__ == "__main__":
     for epoch in range(1, args.epochs + 1):
         logger.info(f'Epoch {epoch}/{args.epochs}')
         try:
-            loss_per_iteration, epoch_time = train_one_epoch(train_data_loader, model, device, logger,
-                                                                         optimizer=optimizer)
+            loss_per_iteration, epoch_time = train_one_epoch(train_data_loader=train_data_loader, model=model,
+                                                             device=device, logger=logger,
+                                                             optimizer=optimizer, args=args)
             avg_losses = torch.mean(torch.stack(loss_per_iteration))
             logger.info(f'Epoch {epoch} avg Loss {avg_losses} with a runtime of {epoch_time}')
-        except Exception as e:
+        except (KeyboardInterrupt, SystemExit):
             logger.error(f'Error: {traceback.format_exc()}')
-            save_model(path=output_path, model=model, epochs=epoch)
+            save_model(path=output_path, model=model, epochs=epoch, logger=logger)
         if epoch % args.start_eval == 0:
-            avg_score = start_evaluation(test_data_loader, model, device, output_path, epoch, logger)
+            avg_score = start_evaluation(test_data_loader=test_data_loader, model=model, device=device, epoch=epoch,
+                                         logger=logger)
             logger.info(f'Epoch {epoch} avg score {avg_score}')
             if avg_score > best_eval_score:
                 best_eval_score = avg_score
-                save_model(path=output_path, model=model, epochs=epoch)
+                save_model(path=output_path, model=model, epochs=epoch, logger=logger)
 
+
+if __name__ == "__main__":
+    main()
