@@ -29,6 +29,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument('--batch_size', type=int, default=5, help='Batch Size for training')
     parser.add_argument('--start_eval', type=int, default=5, help='Epochs after which a eval run is started.')
     parser.add_argument('--epochs', type=int, default=100, help='Epochs for training.')
+    parser.add_argument('--print_status', type=int, default=10, help='Print status updates')
     args = parser.parse_args()
     return args
 
@@ -36,7 +37,7 @@ def parse_arguments() -> argparse.Namespace:
 def save_model(path, epochs, model):
     file_path = os.path.join(path, f'custom_model{epochs}.model')
     torch.save(model.state_dict(), file_path)
-    logger.info(f"Checkpoint Saved for epoch {epoch}")
+    logger.info(f"Checkpoint Saved for epoch {epochs}")
 
 
 def create_data_loader(args: argparse.Namespace) -> Tuple[DataLoader, DataLoader]:
@@ -68,8 +69,9 @@ def start_evaluation(test_data_loader, model, device, output_path, epoch, logger
                 predicted_labels = element['labels']
                 true_labels = targets[output_idx]['labels']
                 scores.append(torch.mean(element['scores']))
-                logger.info(f'Scores {element["scores"]} \n' 
-                            f'Labels predicted: {predicted_labels} Groundtruth labels: {true_labels}')
+        if idx % args.print_status:
+            logger.info(f'Scores {element["scores"]} \n'
+                        f'Labels predicted: {predicted_labels} Groundtruth labels: {true_labels}')
     avg_score = torch.mean(torch.Tensor(scores))
     return avg_score
 
@@ -89,10 +91,10 @@ def train_one_epoch(train_data_loader, model, device, logger, optimizer):
             optimizer.step()
             loss_per_iteration.append(losses)
             loss_doc_str = "".join("{}:{} ".format(key, val) for key, val in loss_dict.items())
-        gc.collect()
-        logger.info(f'Iteration: [{idx}/{len(train_data_loader)}]\t'
-                    f'Loss: {losses} \t'
-                    f'Loss_dict: {loss_doc_str}')
+        if idx % args.print_status == 0:
+            logger.info(f'Iteration: [{idx}/{len(train_data_loader)}]\t'
+                        f'Loss: {losses} \t'
+                        f'Loss_dict: {loss_doc_str}')
     epoch_time = time.time() - start
     return loss_per_iteration, epoch_time
 
