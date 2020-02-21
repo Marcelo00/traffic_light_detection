@@ -5,7 +5,7 @@ In order to start the training one can start the bash script or use the trainer.
 
 ## Model
 
-The model used for training is a Faster RCNN model from torchvision. The best model is the `models/20_Feb_23_29_10/fasterrcnn_75_0.8484793901443481` where first number is the epoch and the second number is the average prediction score (mAP) for the whole testdata. The model predicts the bounding box and then classifies. Therefore, the model only get the image for the evaluation.
+The model used for training is a Faster RCNN model from torchvision. The model predicts the bounding box and then classifies. Therefore, the model only get the image for the evaluation. The score is for evaluation is mAP.
 
 ## Data
 
