@@ -59,9 +59,9 @@ def save_model(path, epochs, model, logger, avg_score=0, interrupted=False):
     :param interrupted: If the training was interrupted and the reason for saving the model
     """
     if interrupted:
-        file_path = os.path.join(path, f'custom_model{epochs}_interrupted.model')
+        file_path = os.path.join(path, f'fasterrcnn_{epochs}_interrupted.model')
     else:
-        file_path = os.path.join(path, f'custom_model{epochs}_{avg_score}.model')
+        file_path = os.path.join(path, f'fasterrcnn_{epochs}_{avg_score}.model')
     torch.save(model.state_dict(), file_path)
     logger.info(f"Checkpoint Saved for epoch {epochs}")
 
