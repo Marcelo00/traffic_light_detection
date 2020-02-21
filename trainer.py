@@ -205,6 +205,7 @@ def main():
         except (KeyboardInterrupt, SystemExit):
             logger.error(f'Error: {traceback.format_exc()}')
             save_model(path=output_path, model=model, epochs=epoch, logger=logger, interrupted=True)
+            sys.exit()
         if epoch % args.start_eval == 0:
             avg_score = start_evaluation(test_data_loader=test_data_loader, model=model, device=device, epoch=epoch,
                                          logger=logger, args=args)
