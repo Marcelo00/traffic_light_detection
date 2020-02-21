@@ -24,7 +24,7 @@ class BoschDataset(data.Dataset):
         image = Image.open(os.path.join(self.data_path, image_filename)).convert("RGB")
         image = self.transform(image)
         target = self.targets[index]
-        target = adjust_target_format(target, self.use_riib)
+        target = adjust_target_format(target)
         return image, target
     
     def __len__(self):
