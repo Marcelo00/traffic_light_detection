@@ -1,27 +1,37 @@
-import torch
-from torch import Tensor
 import os
-import yaml
-import utils.constants as constants
 from typing import Dict
 from typing import List
 from typing import Tuple
 
+import torch
+import yaml
+from torch import Tensor
 
-def process_label_file(input_yaml: str, data_folder, train_data: bool, riib: bool = False, clip: bool = True) -> List[Dict]:
-    """ Gets all labels within label file
-    Note that RGB images are 1280x720 and RIIB images are 1280x736.
+import utils.constants as constants
+
+
+def process_label_file(input_yaml_path: str, data_folder, train_data: bool, riib: bool = False, clip: bool = True) -> \
+    List[Dict]:
+    """
+    Gets all labels within label file. Extracted and modified from
+    https://github.com/bosch-ros-pkg/bstld/blob/master/read_label_file.py
     Args:
         input_yaml->str: Path to yaml file
         riib->bool: If True, change path to labeled pictures
         clip->bool: If True, clips boxes so they do not go out of image bounds
     Returns: Labels for traffic lights
+    :param input_yaml_path: Yaml file with the labels
+    :param data_folder: Folder with the data inside
+    :param train_data: If the yaml label file is for training data
+    :param riib: If the iamges are riib or normal png
+    :param clip: Clip the boxes
+    :return:
     """
-    img_labels = get_used_img_labels(input_yaml, data_folder, train_data, riib)
+    img_labels = get_used_img_labels(input_yaml_path, data_folder, train_data, riib)
 
-    assert os.path.isfile(input_yaml), "Input yaml {} does not exist".format(input_yaml)
+    assert os.path.isfile(input_yaml_path), "Input yaml {} does not exist".format(input_yaml_path)
     if not img_labels or not isinstance(img_labels[0], dict) or 'path' not in img_labels[0]:
-        raise ValueError('Something seems wrong with this label-file: {}'.format(input_yaml))
+        raise ValueError('Something seems wrong with this label-file: {}'.format(input_yaml_path))
     for i in range(len(img_labels)):
         # There is (at least) one annotation where xmin > xmax
         for j, box in enumerate(img_labels[i]['boxes']):
@@ -35,7 +45,6 @@ def process_label_file(input_yaml: str, data_folder, train_data: bool, riib: boo
             img_labels[i]['boxes'][j]['label'] = constants.SIMPLIFIED_CLASSES[img_labels[i]['boxes'][j]['label']]
             # Delete occluded key
             box.pop('occluded', None)
-
         # There is (at least) one annotation where xmax > 1279
         if clip:
             for j, box in enumerate(img_labels[i]['boxes']):
@@ -58,10 +67,18 @@ def process_label_file(input_yaml: str, data_folder, train_data: bool, riib: boo
     return img_labels
 
 
-def get_used_img_labels(input_yaml, data_folder, train_data: bool,  riib: bool):
-    with open(input_yaml, 'rb') as yaml_file:
+def get_used_img_labels(input_yaml_path: str, data_folder, train_data: bool, riib: bool) -> List[Dict]:
+    """
+    Extract the labels for the images in the data folder
+    :param input_yaml_path: Yaml file with the labels
+    :param data_folder: Folder with the data inside
+    :param train_data: If the yaml label file is for training data
+    :param riib: If the iamges are riib or normal png
+    :return:
+    """
+    with open(input_yaml_path, 'rb') as yaml_file:
         img_labels = yaml.load(yaml_file, Loader=yaml.FullLoader)
-    yaml_base_path = os.path.abspath(os.path.dirname(input_yaml))
+    yaml_base_path = os.path.abspath(os.path.dirname(input_yaml_path))
     used_images = []
     img_labels_filtered = []
     if riib:
@@ -107,6 +124,11 @@ def get_used_img_labels(input_yaml, data_folder, train_data: bool,  riib: bool):
 
 
 def extract_filenames_and_targets(img_labels: List[Dict]) -> Tuple[List, List]:
+    """
+    Extract the filenames and targets in order to create a data set
+    :param img_labels:
+    :return: List of file_paths and the corresponding labels
+    """
     file_paths = []
     targets = []
     for img in img_labels:
@@ -115,7 +137,12 @@ def extract_filenames_and_targets(img_labels: List[Dict]) -> Tuple[List, List]:
     return file_paths, targets
 
 
-def adjust_target_format(target: List[Dict], riib: bool) -> Dict[str, Tensor]:
+def adjust_target_format(target: List[Dict]) -> Dict[str, Tensor]:
+    """
+    Get the correct format for the boxes and labels needed for the model input
+    :param target: List of dictionary with the labels for the image
+    :return: Dict with the corrected box and labels format
+    """
     corrected_target = {}
     labels = []
     boxes = []
@@ -130,4 +157,9 @@ def adjust_target_format(target: List[Dict], riib: bool) -> Dict[str, Tensor]:
 
 
 def collate_fn(batch: Tuple[Tuple]) -> Tuple[list, list]:
+    """
+    Retruns the batch as two lists. One for the images and one for the targets
+    :param batch: Current batch
+    :return: Corrected batch
+    """
     return tuple(zip(*batch))
