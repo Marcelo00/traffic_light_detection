@@ -13,7 +13,7 @@ pycosat==0.6.3
 pylint==2.4.4
 python-dateutil==2.8.1
 pytz==2019.3
-PyYAML==5.3
+PyYAML==5.4
 ruamel.yaml==0.16.10
 ruamel.yaml.clib==0.2.0
 six==1.14.0
