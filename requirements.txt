@@ -7,7 +7,7 @@ mccabe==0.6.1
 numpy==1.18.1
 opencv-python==4.2.0.32
 pandas==1.0.1
-Pillow==8.1.1
+Pillow==9.3.0
 pycodestyle==2.5.0
 pycosat==0.6.3
 pylint==2.4.4
