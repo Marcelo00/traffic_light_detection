@@ -1,5 +1,7 @@
 # Model for detecting and classifying traffic lights
 
+This repository was part of the recruitment process as a working student for machine learning at UnderstandAI.
+
 ## Training
 To start the training, one can start the bash script or use the trainer.py directly
 
